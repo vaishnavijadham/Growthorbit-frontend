@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Your Account</title>
+
+<style>
+:root {
+  --bg-dark: #0a081a;
+  --primary: #00d2ff;
+  --secondary: #9d50bb;
+  --glass: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text-dim: #b0b0d0;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+body{
+  background-color: var(--bg-dark);
+  color: white;
+  height:100vh ;
+  padding: 30px; /* FIXED */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.signup-container {
+  padding: 2rem;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.signup-container h2 {
+  text-align: center;
+  font-size: 35px;
+  margin-bottom: 1.5rem;
+}
+
+.form-group { margin-bottom: 1rem; }
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 4px;
+}
+
+.btn-signup {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #007bff;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="signup-container">
+<h2>Sign Up</h2>
+
+<!-- FORM ID ADDED -->
+<form id="signupForm">
+
+  <div class="form-group">
+    <label>Full Name</label>
+    <input type="text" id="username" required placeholder="enter your name">
+  </div>
+  
+  <div class="form-group">
+    <label>Email</label>
+    <input type="email" id="email" required placeholder="email@.com">
+  </div>
+
+  <div class="form-group">
+    <label>Password</label>
+    <input type="password" id="password" required placeholder="Create a password">
+  </div>
+
+  <div class="form-group">
+    <label>Confirm Password</label>
+    <!-- FIXED ID -->
+    <input type="password" id="confirmPassword" required placeholder="confirm password">
+  </div>
+
+  <button type="submit" class="btn-signup">Create Account</button>
+
+</form>
+
+<div class="footer-text">
+  Already have an account? <a href="growthorbit-login.html">Login</a>
+</div>
+
+</div>
+
+<script>
+document.getElementById("signupForm")
+.addEventListener("submit", async function(e){
+  e.preventDefault();
+
+  const name = document.getElementById("username").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
+
+  // validation
+  if(password !== confirmPassword){
+    alert("Passwords do not match");
+    return;
+  }
+
+  const user = {
+    name: name,
+    email: email,
+    password: password,
+    confirmPassword:confirmPassword 
+  };
+
+  const response = await fetch(
+"http://localhost:5000/api/v1/auth/signup",
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify(user)
+}
+);
+
+const data = await response.json();
+
+if(response.ok){
+
+alert("Signup successful");
+
+window.location.href =
+"growthorbit-login.html";
+
+}else{
+
+console.log(data);
+
+alert(
+data.errors?.[0]?.msg ||
+data.message ||
+"Signup failed"
+);
+}
+});
+</script>
+
+</body>
+</html>

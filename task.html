@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>task.html</title>
+
+<style>
+
+body{
+  font-family:Arial;
+  background:#0f172a;
+  color:white;
+  padding:20px;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
+
+.card{
+width:100%;
+max-width:800px;
+margin:auto;
+background:#1e293b;
+padding:25px;
+border-radius:12px;
+box-sizing:border-box;
+}
+input,
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:8px;
+box-sizing:border-box;
+}
+
+button{
+background:#6366f1;
+color:white;
+cursor:pointer;
+}
+
+button:hover{
+background:#4f46e5;
+}
+@media (max-width: 600px){
+
+  body{
+    padding:15px;
+  }
+
+  .card{
+    padding:20px;
+    border-radius:10px;
+  }
+
+  h1{
+    font-size:24px;
+    text-align:center;
+  }
+
+  input,
+  button{
+    font-size:16px;
+    padding:14px;
+  }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>Skill Verification</h1>
+
+<input
+id="skill"
+placeholder="Enter Skill"
+/>
+
+<button onclick="createSkill()">
+Create Skill
+</button>
+
+<hr>
+
+<input
+id="certificateUrl"
+placeholder="Certificate URL"
+/>
+
+<button onclick="uploadCertificate()">
+Upload Certificate
+</button>
+
+<hr>
+
+<button onclick="startTest()">
+Start Test
+</button>
+
+</div>
+
+<script>
+
+let currentSkill = "";
+
+
+
+// CREATE
+
+async function createSkill(){
+
+try{
+
+currentSkill =
+document
+.getElementById("skill")
+.value
+.trim()
+.toLowerCase();
+
+if(!currentSkill){
+
+alert(
+"Enter skill"
+);
+
+return;
+
+}
+
+const response =
+await fetch(
+
+"http://localhost:5000/api/v1/skill-verification",
+
+{
+method:"POST",
+
+headers:{
+"Content-Type":"application/json",
+
+Authorization:
+`Bearer ${
+localStorage.getItem("token")
+}`
+},
+
+body:
+JSON.stringify({
+skill:currentSkill
+})
+
+}
+
+);
+
+const data =
+await response.json();
+
+console.log(data);
+
+alert(
+data.message
+);
+
+}
+catch(err){
+
+console.log(err);
+
+alert(
+"Create failed"
+);
+
+}
+
+}
+
+
+
+
+// UPLOAD
+
+async function uploadCertificate(){
+
+try{
+
+const certificateUrl =
+document
+.getElementById(
+"certificateUrl"
+)
+.value
+.trim();
+
+if(
+!certificateUrl
+){
+
+alert(
+"Enter certificate URL"
+);
+
+return;
+
+}
+
+const response =
+await fetch(
+
+"http://localhost:5000/api/v1/skill-verification/certificate",
+
+{
+
+method:"PATCH",
+
+headers:{
+
+"Content-Type":
+"application/json",
+
+Authorization:
+`Bearer ${
+localStorage.getItem(
+"token"
+)
+}`
+
+},
+
+body:
+JSON.stringify({
+
+skill:
+currentSkill,
+
+certificateUrl
+
+})
+
+}
+
+);
+
+const data =
+await response.json();
+
+console.log(data);
+
+alert(
+data.message
+);
+
+}
+
+catch(err){
+
+console.log(err);
+
+alert(
+"Upload failed"
+);
+
+}
+
+}
+
+
+
+
+// START TEST
+
+async function startTest(){
+
+try{
+
+if(!currentSkill){
+
+alert(
+"Enter skill first"
+);
+
+return;
+
+}
+
+const response =
+await fetch(
+
+`http://localhost:5000/api/v1/skill-verification/${currentSkill}/test`,
+
+{
+
+headers:{
+
+Authorization:
+`Bearer ${
+localStorage.getItem(
+"token"
+)
+}`
+
+}
+
+}
+
+);
+
+const data =
+await response.json();
+
+console.log(
+"TEST RESPONSE:",
+data
+);
+
+
+// IMPORTANT FIX
+
+const questions =
+data?.data?.questions;
+
+
+if(
+!questions
+||
+!questions.length
+){
+
+alert(
+"No test available"
+);
+
+return;
+
+}
+
+
+// RESET OLD
+
+localStorage.removeItem(
+"testQuestions"
+);
+
+
+// SAVE
+
+localStorage.setItem(
+
+"testQuestions",
+
+JSON.stringify(
+questions
+)
+
+);
+
+localStorage.setItem(
+
+"currentSkill",
+
+currentSkill
+
+);
+
+
+console.log(
+"Questions Saved",
+questions
+);
+
+
+// REDIRECT
+
+window.location.href =
+"./test.html";
+
+}
+
+catch(err){
+
+console.log(err);
+
+alert(
+"Failed to start test"
+);
+
+}
+
+}
+
+</script>
+
+</body>
+
+</html>

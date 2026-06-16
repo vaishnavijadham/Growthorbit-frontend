@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Skill Test</title>
+
+<style>
+
+body{
+background:#0f172a;
+color:white;
+font-family:Arial;
+padding:30px;
+}
+
+.card{
+max-width:900px;
+margin:auto;
+background:#1e293b;
+padding:30px;
+border-radius:12px;
+}
+
+.question{
+margin:20px 0;
+padding:15px;
+border:1px solid #334155;
+border-radius:10px;
+}
+
+.option{
+display:block;
+margin:10px 0;
+}
+
+button{
+width:100%;
+padding:14px;
+background:#22c55e;
+border:none;
+color:white;
+border-radius:10px;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>Skill Test</h1>
+
+<div id="questions"></div>
+
+</div>
+
+<script>
+
+const questions =
+JSON.parse(
+localStorage.getItem("testQuestions")
+) || [];
+
+const skill =
+localStorage.getItem("currentSkill");
+
+function renderQuestions(){
+
+const box =
+document.getElementById(
+"questions"
+);
+
+if(!questions.length){
+
+box.innerHTML =
+"<h2>No Test Available</h2>";
+
+return;
+
+}
+
+box.innerHTML="";
+
+questions.forEach((q,index)=>{
+
+box.innerHTML += `
+
+<div class="question">
+
+<h3>
+${index+1}. ${q.question}
+</h3>
+
+${q.options.map((opt,i)=>`
+
+<label class="option">
+
+<input
+type="radio"
+name="q${index}"
+value="${i}"
+>
+
+${opt}
+
+</label>
+
+`).join("")}
+
+</div>
+
+`;
+
+});
+
+box.innerHTML += `
+<button id="submitBtn">
+Submit Test
+</button>
+`;
+
+document
+.getElementById("submitBtn")
+.addEventListener(
+"click",
+submitTest
+);
+
+}
+
+async function submitTest(){
+
+try{
+
+const answers=[];
+
+for(
+let i=0;
+i<questions.length;
+i++
+){
+
+const selected =
+document.querySelector(
+`input[name="q${i}"]:checked`
+);
+
+answers.push(
+selected
+?
+Number(selected.value)
+:
+-1
+);
+
+}
+
+const response =
+await fetch(
+
+`http://localhost:5000/api/v1/skill-verification/${skill}/test/submit`,
+
+{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json",
+
+Authorization:
+`Bearer ${localStorage.getItem("token")}`
+},
+
+body:
+JSON.stringify({
+
+answers,
+
+questions
+
+})
+
+}
+
+);
+
+const data =
+await response.json();
+
+console.log(data);
+
+if(
+!data.data
+){
+
+alert(
+"Result missing"
+);
+
+return;
+
+}
+
+localStorage.setItem(
+"resultData",
+
+JSON.stringify(
+data.data
+)
+
+);
+
+window.location.href =
+"./result.html";
+
+}
+catch(err){
+
+console.error(err);
+
+alert(
+"Submit Failed"
+);
+
+}
+
+}
+
+renderQuestions();
+
+</script>
+
+</body>
+</html>

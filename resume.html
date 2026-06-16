@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Growth Orbit Resume</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:linear-gradient(135deg,#0f172a,#1e293b);
+padding:40px;
+}
+
+.container{
+max-width:800px;
+margin:auto;
+background:white;
+padding:35px;
+border-radius:16px;
+}
+
+h1{
+text-align:center;
+margin-bottom:30px;
+}
+
+h2{
+color:#6366f1;
+margin-top:25px;
+}
+
+input,
+textarea{
+width:100%;
+padding:12px;
+margin-top:8px;
+margin-bottom:12px;
+border:1px solid #ddd;
+border-radius:8px;
+box-sizing:border-box;
+}
+
+textarea{
+height:90px;
+}
+
+.row{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px;
+}
+
+button{
+width:100%;
+padding:14px;
+background:#6366f1;
+color:white;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-size:16px;
+}
+
+button:hover{
+background:#4f46e5;
+}
+
+button:disabled{
+opacity:.6;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Create Resume</h1>
+
+<form id="resumeForm">
+
+<h2>Personal Information</h2>
+
+<input id="fullName" required placeholder="Full Name">
+
+<div class="row">
+<input id="phone" placeholder="Phone">
+<input id="email" type="email" required placeholder="Email">
+</div>
+
+<input id="linkedin" placeholder="LinkedIn URL">
+<input id="github" placeholder="GitHub URL">
+<input id="portfolio" placeholder="Portfolio URL">
+
+<div class="row">
+<input id="dob" type="date">
+<input id="languages" placeholder="Hindi, English">
+</div>
+
+<h2>Education</h2>
+
+<div class="row">
+<input id="course" placeholder="Course">
+<input id="branch" placeholder="Branch">
+</div>
+
+<input id="specialization" placeholder="Specialization">
+
+<div class="row">
+<input id="semester" placeholder="Current Semester">
+<input id="college" placeholder="Current College">
+</div>
+
+<div class="row">
+<input id="pastClass" placeholder="Past Class">
+<input id="pastCollege" placeholder="Past School">
+</div>
+
+<h2>Skills</h2>
+<input id="skills" placeholder="HTML, CSS, JavaScript">
+
+<h2>Achievements</h2>
+<textarea id="achievements" placeholder="School topper, hackathon etc"></textarea>
+
+<h2>Certifications</h2>
+<textarea id="certifications" placeholder="Certification name, year"></textarea>
+
+<h2>Hobbies</h2>
+<input id="hobbies" placeholder="Reading, Writing">
+
+<br>
+
+<label>
+<input type="checkbox" id="agree">
+Declaration Accepted
+</label>
+
+<br>
+
+<button id="saveBtn">Generate Resume</button>
+
+</form>
+
+</div>
+
+<script>
+
+const form = document.getElementById("resumeForm");
+const btn = document.getElementById("saveBtn");
+
+form.addEventListener("submit", async (e) => {
+e.preventDefault();
+
+if(!agree.checked){
+alert("Please accept declaration");
+return;
+}
+
+const token = localStorage.getItem("token");
+
+if(!token){
+alert("Please login");
+window.location = "growthorbit-login.html";
+return;
+}
+
+const data = {
+
+personalInfo:{
+fullName: fullName.value,
+phone: phone.value,
+email: email.value,
+linkedIn: linkedin.value,
+github: github.value,
+portfolio: portfolio.value,
+dateOfBirth: dob.value || null,
+languagesKnown: languages.value
+? languages.value.split(",").map(x => x.trim())
+: []
+},
+
+education:{
+current:{
+courseName: course.value,
+branchName: branch.value,
+specialization: specialization.value,
+currentSemester: semester.value,
+institution: college.value
+},
+past:{
+classSemester: pastClass.value,
+institution: pastCollege.value
+}
+},
+
+skills: skills.value
+? skills.value.split(",").map(x => ({
+skillName: x.trim(),
+proficiency: "Intermediate"
+}))
+: [],
+
+achievements: achievements.value
+? [{ title: achievements.value }]
+: [],
+
+certifications: certifications.value
+? certifications.value.split(",").map(c => ({
+title: c.trim()
+}))
+: [],
+
+hobbies: hobbies.value
+? hobbies.value.split(",").map(x => x.trim())
+: [],
+
+declaration:{
+agreed:true
+}
+
+};
+
+try{
+
+btn.disabled = true;
+btn.innerText = "Generating...";
+
+const response = await fetch(
+"http://localhost:5000/api/v1/resume",
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:`Bearer ${token}`
+},
+body: JSON.stringify(data)
+}
+);
+
+const result = await response.json();
+
+if(response.ok){
+alert("Resume Generated");
+window.location = "generated-resume.html";
+}else{
+alert(result.message || "Generation failed");
+}
+
+}catch(err){
+alert("Cannot connect");
+}
+
+btn.disabled = false;
+btn.innerText = "Generate Resume";
+
+});
+
+</script>
+
+</body>
+</html>

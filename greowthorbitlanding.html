@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <title>Growth Orbit | AI Career Guidance</title>
+    <link rel="icon" type="image/png" href="images/logo.png">
+
+    <style>
+        /* Base Styles & Variables */
+        :root {
+            --bg-dark: #0f0c29;
+            --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            --accent-blue: #00d2ff;
+            --accent-purple: #9d50bb;
+            --text-light: #f4f4f9;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 1s ease forwards;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 10%;
+            background: rgba(15, 12, 41, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: linear-gradient(to right, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-light);
+            font-weight: 500;
+            transition: var(--transition);
+            opacity: 0.8;
+        }
+
+        .nav-links a:hover {
+            opacity: 1;
+            color: var(--accent-blue);
+        }
+
+        .btn-login {
+            background: linear-gradient(to right, var(--accent-blue), var(--accent-purple));
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            color: white !important;
+            font-weight: 600 !important;
+            opacity: 1 !important;
+            box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 8rem 10% 5rem;
+        }
+
+        .hero h1 {
+
+    font-size: clamp(2rem, 6vw, 4rem);
+
+    margin-bottom: 1.5rem;
+
+    background: linear-gradient(to bottom, #fff, #ccc);
+
+    -webkit-background-clip: text;
+
+    -webkit-text-fill-color: transparent;
+
+}
+
+        .hero p {
+
+    font-size: clamp(1rem, 2vw, 1.25rem);
+
+    max-width: 700px;
+
+    margin-bottom: 2.5rem;
+
+    color: #b0b0d0;
+
+}
+
+        .hero-btns {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .btn-primary, .btn-secondary {
+            padding: 1rem 2.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: #0f0c29;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 210, 255, 0.2);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+        }
+          .hero-slider{
+        width: 100%;
+        max-width: 900px;
+        border-radius: 20px;
+        overflow: hidden;
+         box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+          }
+
+.carousel-item img{
+    height: 400px;
+    object-fit: cover;
+}
+
+        .front {
+            width: 95%;
+            margin-right: 20px;
+            max-width: 800px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            
+        }
+        .back{
+           width: 100%;
+            max-width: 800px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 5%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .feature-card {
+            background: var(--glass-bg);
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent-blue);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .feature-card p {
+            color: #b0b0d0;
+            font-size: 0.95rem;
+        }
+          /* Footer */
+        
+
+        footer {
+            padding: 1rem 10%;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 4rem;
+        }
+
+        footer p {
+            opacity: 0.6;
+            font-size: 0.9rem;
+        } 
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+
+    nav{
+        flex-direction: column;
+        gap: 15px;
+        padding: 1rem 5%;
+    }
+
+    .nav-links{
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .hero{
+        padding: 4rem 5% 2rem;
+    }
+
+    .hero-btns{
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn-primary,
+    .btn-secondary{
+        width: 100%;
+        text-align: center;
+    }
+
+    .carousel-item img{
+        height: 220px;
+    }
+
+    footer{
+        padding: 2rem 5%;
+    }
+}
+@media (min-width: 769px) and (max-width: 1024px){
+
+    nav{
+        padding: 1.2rem 5%;
+    }
+
+    .hero{
+        padding: 6rem 5% 4rem;
+    }
+
+    .carousel-item img{
+        height: 300px;
+    }
+}
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">GROWTH ORBIT</div>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#features">Features</a></li>
+        <!-- <li><a href="#about">About</a></li>--> 
+            <li><a href="growthorbit-login.html" class="btn-login">Login</a></li>
+        </ul>
+    </nav>
+
+    <header class="hero fade-in" id="home">
+        <h1>Shape Your Career with AI</h1>
+        <p>Get personalized roadmaps, track your progress, and build your resume automatically with the power of artificial intelligence.</p>
+        
+        <div class="hero-btns">
+            <a href="growthorbit-login.html" class="btn-primary">Get Started</a>
+        </div>
+        <div id="carouselExample" class="carousel slide hero-slider" data-bs-ride="carousel" data-bs-interval="1000">
+    
+  <div class="carousel-inner">
+
+    <div class="carousel-item active">
+      <img src="images/image2.jpg" class="d-block w-100" alt="growtorbit">
+    </div>
+
+    <div class="carousel-item">
+      <img src="images/image3.jpg" class="d-block w-100" alt="growtorbit">
+    </div>
+
+    <div class="carousel-item">
+      <img src="images/image1.jpg" class="d-block w-100" alt="growtorbit">
+    </div>
+
+  </div>
+
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon"></span>
+  </button>
+
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+    <span class="carousel-control-next-icon"></span>
+  </button>
+
+</div>
+    </header>
+
+    <section class="features" id="features">
+        <div class="feature-card fade-in">
+            <span class="feature-icon">🗺️</span>
+            <h3>Personalized Roadmap</h3>
+            <p>Tailored learning paths based on your career goals and current skill set, updated in real-time.</p>
+        </div>
+
+        <div class="feature-card fade-in" style="transition-delay: 0.2s;">
+            <span class="feature-icon">📈</span>
+            <h3>Skill Progress Tracking</h3>
+            <p>Visualize your growth across different domains with our interactive skill-tree and analytics dashboard.</p>
+        </div>
+
+        <div class="feature-card fade-in" style="transition-delay: 0.4s;">
+            <span class="feature-icon">📄</span>
+            <h3>Smart Resume Builder</h3>
+            <p>Automatically generate professional resumes that highlight your achievements and pass AI filters.</p>
+        </div>
+        
+</section>
+
+
+    <footer>
+        <h2 class="logo" style="margin-bottom: 1rem;">Growth Orbit</h2>
+        <p>Empowering student growth with AI &copy; 2026</p>
+        <p><i class="fa-solid fa-phone"></i> +91 9770764310 &nbsp;&nbsp;|| &nbsp;&nbsp;<i class="fa-solid fa-envelope"></i> supportgrowthorbit@gmail.com</p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

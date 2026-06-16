@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Roadmap Generator</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+
+<style>
+:root {
+  --bg:#050a0e;
+  --surface:#0d1b24;
+  --border:#1a3040;
+  --accent:#00e5ff;
+  --text:#e8f4f8;
+  --muted:#5a7a8a;
+}
+
+body{
+margin:0;
+font-family:'DM Mono', monospace;
+background:var(--bg);
+color:var(--text);
+}
+
+.page{
+display:flex;
+flex-direction:column;
+align-items:center;
+padding:40px 20px;
+}
+
+h1{
+font-family:'Syne',sans-serif;
+font-size:40px;
+margin-bottom:10px;
+}
+
+p{
+color:var(--muted);
+}
+
+.card{
+background:var(--surface);
+border:1px solid var(--border);
+padding:30px;
+width:100%;
+max-width:500px;
+margin-top:20px;
+}
+
+label{
+display:block;
+margin-top:15px;
+font-size:12px;
+color:var(--muted);
+}
+
+select{
+width:100%;
+padding:12px;
+margin-top:5px;
+background:#071017;
+border:1px solid var(--border);
+color:white;
+}
+
+button{
+width:100%;
+margin-top:20px;
+padding:14px;
+background:var(--accent);
+border:none;
+font-weight:bold;
+cursor:pointer;
+}
+
+#output{
+width:100%;
+max-width:900px;
+margin-top:40px;
+display:none;
+}
+
+.phase{
+background:var(--surface);
+border:1px solid var(--border);
+padding:25px;
+margin-bottom:15px;
+border-radius:10px;
+}
+
+.phase h3{
+margin:0;
+color:var(--accent);
+font-family:'Syne',sans-serif;
+}
+
+.phase p{
+margin-top:10px;
+color:var(--text);
+line-height:1.5;
+}
+
+.section-title{
+margin-top:15px;
+font-size:12px;
+color:var(--muted);
+text-transform:uppercase;
+}
+
+.resource{
+margin-top:8px;
+}
+
+.resource a{
+color:var(--accent);
+text-decoration:none;
+}
+
+.resource a:hover{
+text-decoration:underline;
+}
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+<h1>Career Roadmap</h1>
+<p>Select your path → generate roadmap</p>
+
+<div class="card">
+
+<label>Course</label>
+<select id="course">
+<option value="">Select</option>
+<option value="btech">B.Tech</option>
+<option value="bca">BCA</option>
+</select>
+
+<label>Specialisation</label>
+<select id="subcourse">
+<option value="">Select</option>
+<option value="cse">CSE</option>
+<option value="aiml">AI/ML</option>
+<option value="cyber">Cyber Security</option>
+<option value="data">Data Analytics</option>
+</select>
+
+<label>Role</label>
+<select id="role">
+<option value="">Select</option>
+<option value="web developer">Web Developer</option>
+<option value="software engineer">Software Engineer</option>
+<option value="data analyst">Data Analyst</option>
+<option value="ml engineer">ML Engineer</option>
+</select>
+
+<button onclick="generateRoadmap()" id="btn">Generate Roadmap</button>
+
+</div>
+
+<div id="output"></div>
+
+</div>
+
+<script>
+
+async function generateRoadmap() {
+
+  const course = document.getElementById("course").value;
+  const subcourse = document.getElementById("subcourse").value;
+  const role = document.getElementById("role").value;
+
+  if (!course || !subcourse || !role) {
+    alert("Please select all fields");
+    return;
+  }
+
+  const btn = document.getElementById("btn");
+  const output = document.getElementById("output");
+
+  btn.disabled = true;
+  btn.innerText = "Generating...";
+
+  output.style.display = "block";
+  output.innerHTML = "<p>Loading roadmap...</p>";
+
+  try {
+
+    const res = await fetch("http://localhost:5000/api/v1/roadmap", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      },
+      body: JSON.stringify({
+        field: subcourse,
+        course,
+        subcourse,
+        goal: role,
+        role
+      })
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) throw new Error(result.message);
+
+    const roadmap = result.data || result;
+
+    const phases =
+      roadmap?.aiGeneratedContent?.phases ||
+      roadmap?.phases ||
+      [];
+
+    renderRoadmap(phases);
+
+  } catch (err) {
+    output.innerHTML = `<p style="color:red;">${err.message}</p>`;
+  }
+
+  btn.disabled = false;
+  btn.innerText = "Generate Roadmap";
+}
+
+
+//  ROADMAP UI
+function renderRoadmap(phases) {
+
+  const output = document.getElementById("output");
+  output.innerHTML = "";
+
+  if (!Array.isArray(phases) || phases.length === 0) {
+    output.innerHTML = "<p>No roadmap generated.</p>";
+    return;
+  }
+
+  phases.forEach((phase, i) => {
+
+    const resourcesHTML = (phase.resources || [])
+      .map(r => `
+        <div class="resource">
+          🔗 <a href="${r.url}" target="_blank">${r.title}</a>
+        </div>
+      `)
+      .join("");
+
+    output.innerHTML += `
+      <div class="phase">
+        <h3>${i + 1}. ${phase.title}</h3>
+        <p>${phase.description}</p>
+
+        <div class="section-title">🎓 Free Certified Courses</div>
+        ${resourcesHTML}
+      </div>
+    `;
+  });
+}
+
+</script>
+
+</body>
+</html>

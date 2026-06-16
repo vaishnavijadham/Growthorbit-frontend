@@ -1,0 +1,501 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Generated Resume</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+font-family:Arial,sans-serif;
+background:#f3f4f6;
+padding:20px;
+color:#111827;
+}
+
+.container{
+max-width:1100px;
+margin:auto;
+background:white;
+padding:50px 70px;
+}
+
+.actions{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:30px;
+}
+
+button{
+padding:10px 16px;
+border:none;
+background:#111827;
+color:white;
+cursor:pointer;
+border-radius:8px;
+}
+
+button:hover{
+opacity:.92;
+}
+
+button:disabled{
+opacity:.6;
+}
+
+.header{
+padding-bottom:20px;
+border-bottom:2px solid #111;
+}
+
+.header h1{
+font-size:38px;
+margin-bottom:8px;
+}
+
+.role{
+font-size:18px;
+color:#555;
+margin-bottom:12px;
+}
+
+.contact{
+line-height:1.8;
+}
+
+.section{
+margin-top:28px;
+}
+
+.section h2{
+font-size:17px;
+margin-bottom:12px;
+border-bottom:1px solid #d1d5db;
+padding-bottom:6px;
+}
+
+.section p{
+line-height:1.7;
+margin-bottom:8px;
+}
+
+.entry{
+margin-bottom:16px;
+}
+
+@media print{
+
+.actions{
+display:none;
+}
+
+body{
+background:white;
+padding:0;
+}
+
+.container{
+padding:35px;
+max-width:none;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="actions">
+
+<button onclick="loadOriginal()">
+Original Resume
+</button>
+
+<button onclick="loadATS()">
+ATS Resume
+</button>
+
+<button id="atsBtn" onclick="generateATS()">
+Generate ATS
+</button>
+
+<button onclick="window.print()">
+Download PDF
+</button>
+
+<button onclick="location.href='dashboard.html'">
+Back
+</button>
+
+</div>
+
+<div id="resume">
+Loading...
+</div>
+
+</div>
+
+<script>
+
+const API =
+"http://localhost:5000/api/v1";
+
+const token =
+localStorage.getItem("token");
+
+function auth(){
+
+return{
+
+Authorization:
+`Bearer ${token}`
+
+};
+
+}
+
+function safe(v){
+
+return v || "-";
+
+}
+
+function getText(obj){
+
+if(!obj)return "-";
+
+if(typeof obj==="string")
+return obj;
+
+return(
+obj.title
+||
+obj.skillName
+||
+obj.certificationName
+||
+obj.name
+||
+obj.description
+||
+obj.text
+||
+obj.value
+||
+"-"
+);
+
+}
+
+function cleanSummary(text){
+
+if(!text){
+
+return "Computer Science student with technical skills and project experience.";
+
+}
+
+return text
+.replace(/\*\*/g,"")
+.replace("Professional Summary","")
+.trim();
+
+}
+
+function renderResume(
+resume,
+isATS=false
+){
+
+return `
+
+<div
+class="header"
+style="text-align:${isATS?"center":"left"}">
+
+<h1>
+${safe(resume.personalInfo?.fullName)}
+</h1>
+
+<div class="role">
+
+${safe(
+resume.personalInfo?.targetRole
+||
+"Computer Science Student"
+)}
+
+</div>
+
+<div class="contact">
+
+${safe(resume.personalInfo?.phone)}
+
+|
+
+${safe(resume.personalInfo?.email)}
+
+<br>
+
+LinkedIn:
+${safe(resume.personalInfo?.linkedIn)}
+
+<br>
+
+GitHub:
+${safe(resume.personalInfo?.github)}
+
+<br>
+
+Portfolio:
+${safe(resume.personalInfo?.portfolio)}
+
+</div>
+
+</div>
+
+
+<div class="section">
+
+<h2>PROFESSIONAL SUMMARY</h2>
+
+<p>
+
+${cleanSummary(
+resume.aiGeneratedContent?.summary
+)}
+
+</p>
+
+</div>
+
+
+<div class="section">
+
+<h2>EDUCATION</h2>
+
+<p>
+
+${safe(
+resume.education?.current?.courseName
+)}
+
+|
+
+${safe(
+resume.education?.current?.branchName
+)}
+
+</p>
+
+<p>
+
+${safe(
+resume.education?.current?.institution
+)}
+
+</p>
+
+<p>
+
+Semester:
+${safe(
+resume.education?.current?.currentSemester
+)}
+
+</p>
+
+</div>
+
+
+<div class="section">
+
+<h2>EXPERIENCE</h2>
+
+<p>
+
+${
+resume.experience?.length
+?
+resume.experience
+.map(getText)
+.join("<br>")
+:
+"No experience"
+}
+
+</p>
+
+</div>
+
+
+<div class="section">
+
+<h2>SKILLS</h2>
+
+<p>
+
+${
+resume.skills?.length
+?
+resume.skills
+.map(getText)
+.join(", ")
+:
+"-"
+}
+
+</p>
+
+</div>
+
+
+<div class="section">
+
+<h2>CERTIFICATIONS</h2>
+
+${
+resume.certifications?.length
+?
+resume.certifications
+.map(
+x=>`<p>${getText(x)}</p>`
+)
+.join("")
+:
+"<p>No certifications</p>"
+}
+
+</div>
+
+
+<div class="section">
+
+<h2>ACHIEVEMENTS</h2>
+
+${
+resume.achievements?.length
+?
+resume.achievements
+.map(
+x=>`<p>${getText(x)}</p>`
+)
+.join("")
+:
+"<p>No achievements</p>"
+}
+
+</div>
+
+
+</div>
+
+`;
+
+}
+
+async function loadOriginal(){
+
+const res=
+await fetch(
+`${API}/resume`,
+{
+headers:auth()
+}
+);
+
+const data=
+await res.json();
+
+document.getElementById(
+"resume"
+).innerHTML=
+renderResume(
+data.data,
+false
+);
+
+}
+
+async function loadATS(){
+
+await loadOriginal();
+
+document.getElementById(
+"resume"
+)
+.firstElementChild
+.style.textAlign=
+"center";
+
+}
+
+async function generateATS(){
+
+const btn=
+document.getElementById(
+"atsBtn"
+);
+
+try{
+
+btn.disabled=true;
+
+btn.innerText=
+"Generating...";
+
+await fetch(
+
+`${API}/resume/generate-ats`,
+
+{
+method:"POST",
+
+headers:auth()
+}
+
+);
+
+await loadATS();
+
+}
+
+catch{
+
+alert(
+"ATS generation failed"
+);
+
+}
+
+finally{
+
+btn.disabled=false;
+
+btn.innerText=
+"Generate ATS";
+
+}
+
+}
+
+loadOriginal();
+
+</script>
+
+</body>
+
+</html>

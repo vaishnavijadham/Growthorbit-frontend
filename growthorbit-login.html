@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login | Growth Orbit</title>
+
+<style>
+:root {
+  --bg-dark: #0a081a;
+  --primary: #00d2ff;
+  --secondary: #9d50bb;
+  --glass: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text-dim: #b0b0d0;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+body{
+  background-color: var(--bg-dark);
+  color: white;
+  height:100vh ;
+  padding: 30px; /* FIXED */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.form-side {
+  padding: 50px;
+  display: flex;
+  flex-direction: column ;
+  justify-content: center;
+}
+
+.form-header { margin-bottom: 2rem; }
+.form-header h2 { font-size: 2rem; margin-bottom: 0.5rem; }
+.form-header p { color: var(--text-dim); }
+
+.input-group {
+  margin-bottom: 1.5rem;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+  color: var(--text-dim);
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  color: white;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  font-size: 0.85rem;
+}
+
+.actions a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  color: white;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="form-side">
+
+<div class="form-header">
+  <h2>Login</h2>
+  <p>Enter your details to access your orbit.</p>
+</div>
+
+<!-- FORM ID ADDED -->
+<form id="loginForm">
+
+  <div class="input-group">
+    <label>Email Address</label>
+    <!-- ID ADDED -->
+    <input type="email" id="email" placeholder="name@university.edu" required>
+  </div>
+
+  <div class="input-group">
+    <label>Password</label>
+    <!-- ID ADDED -->
+    <input type="password" id="password" placeholder="••••••••" required>
+  </div>
+
+  <div class="actions">
+    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+      <input type="checkbox" style="width: auto;"> Remember me
+    </label>
+    <a href="#">Forgot Password?</a>
+  </div>
+
+  <button type="submit" class="btn-submit">Launch Dashboard</button>
+
+</form>
+
+<p style="margin-top: 2rem; font-size: 0.85rem; text-align: center; color: var(--text-dim);">
+  New to the orbit? 
+  <a href="signup.html" style="color: var(--secondary); text-decoration: none; font-weight: 600;">
+    Create account
+  </a>
+</p>
+
+</div>
+<script>
+
+document
+.getElementById("loginForm")
+.addEventListener(
+"submit",
+async function(e){
+
+e.preventDefault();
+
+const email =
+document
+.getElementById("email")
+.value
+.trim();
+
+const password =
+document
+.getElementById("password")
+.value
+.trim();
+
+try{
+
+const response =
+await fetch(
+"http://localhost:5000/api/v1/auth/login",
+{
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+email,
+password
+})
+}
+);
+
+const data =
+await response.json();
+
+console.log(data);
+
+if(response.ok){
+
+alert("Login successful");
+
+localStorage.setItem(
+"token",
+data.data.accessToken
+);
+
+localStorage.setItem(
+"isLoggedIn",
+"true"
+);
+
+window.location.href =
+"dashboard.html";
+
+}else{
+
+alert(
+data.message ||
+"Invalid email or password"
+);
+
+}
+
+}catch(err){
+
+console.log(err);
+
+alert(
+"Cannot connect to server"
+);
+
+}
+
+});
+
+</script>
+
+</body>
+</html>

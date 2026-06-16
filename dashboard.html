@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<title>Growth Orbit Dashboard</title>
+
+<style>
+
+/* ===== YOUR ORIGINAL CSS (UNCHANGED) ===== */
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: Arial, sans-serif;
+}
+
+body{
+  display:flex;
+  background: linear-gradient(135deg,#0f172a,#111827);
+  color:white;
+  min-height:100vh;
+}
+
+.sidebar{
+  width:240px;
+  height:100vh;
+  background:#020617;
+  padding:25px 20px;
+  position:fixed;
+  top:0;
+  left:0;
+  border-right:1px solid rgba(255,255,255,0.08);
+}
+
+.sidebar h2{
+  margin-bottom:35px;
+  font-size:clamp(22px,4vw,28px);
+  color:#818cf8;
+}
+
+.sidebar ul{
+  list-style:none;
+}
+
+.sidebar ul li{
+  margin-bottom:12px;
+  border-radius:12px;
+  transition:0.3s;
+  padding:16px 18px;
+  cursor:pointer;
+}
+
+.sidebar ul li:not(:first-child):hover{
+  background:#1e293b;
+  transform:translateX(5px);
+}
+
+.sidebar ul li a{
+  text-decoration:none;
+  color:white;
+  display:block;
+}
+
+.main{
+  margin-left:240px;
+  width:calc(100% - 240px);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+.navbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 35px;
+  background:rgba(15,23,42,0.8);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  position:sticky;
+  top:0;
+}
+
+.icon{ cursor:pointer; font-size:22px; }
+
+.hero{ padding:40px 35px 20px; }
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:20px;
+  padding:0 35px;
+  margin-top:15px;
+}
+
+.card{
+  background:#1e293b;
+  padding:25px;
+  border-radius:16px;
+}
+
+.tasks, .roadmap, .rewards{
+  margin:20px 35px;
+  background:#1e293b;
+  padding:25px;
+  border-radius:16px;
+}
+
+.task{
+  background:#111827;
+  padding:15px;
+  margin-top:10px;
+  border-radius:10px;
+}
+
+.ats-section{
+  margin:20px 35px;
+  background:#1e293b;
+  padding:25px;
+  border-radius:16px;
+}
+
+#ats-preview{
+  margin-top:15px;
+  background:#111827;
+  padding:20px;
+  border-radius:12px;
+  max-height:400px;
+  overflow:auto;
+}
+
+footer{
+  margin-top:auto;
+  padding:30px;
+  text-align:center;
+  background:#020617;
+}
+
+/* ===== NEW: SAAS-STYLE ENHANCEMENTS (ADDITIVE ONLY) ===== */
+
+.hidden{ display:none !important; }
+
+.muted{ color:#94a3b8; font-size:13px; }
+
+.live-dot{
+  display:inline-block;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#22c55e;
+  margin-right:6px;
+  box-shadow:0 0 0 0 rgba(34,197,94,0.7);
+  animation:pulse 2s infinite;
+}
+
+@keyframes pulse{
+  0%{ box-shadow:0 0 0 0 rgba(34,197,94,0.5); }
+  70%{ box-shadow:0 0 0 6px rgba(34,197,94,0); }
+  100%{ box-shadow:0 0 0 0 rgba(34,197,94,0); }
+}
+
+.progress-track{
+  margin-top:12px;
+  height:8px;
+  background:#0f172a;
+  border-radius:6px;
+  overflow:hidden;
+}
+
+.progress-fill{
+  height:100%;
+  background:linear-gradient(90deg,#6366f1,#818cf8);
+  width:0%;
+  transition:width 0.6s ease;
+}
+
+.badge-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:10px;
+}
+
+.badge{
+  background:#312e81;
+  color:#c7d2fe;
+  padding:6px 14px;
+  border-radius:999px;
+  font-size:13px;
+}
+
+.badge.muted{
+  background:#111827;
+  color:#64748b;
+}
+
+.task-status{
+  display:inline-block;
+  font-size:11px;
+  padding:2px 8px;
+  border-radius:6px;
+  background:#312e81;
+  color:#c7d2fe;
+  margin-left:8px;
+}
+
+.task.empty{
+  color:#94a3b8;
+  text-align:center;
+}
+
+.link-btn{
+  margin-top:15px;
+  background:#6366f1;
+  color:#fff;
+  border:none;
+  padding:10px 18px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:14px;
+}
+
+.link-btn:hover{ background:#4f46e5; }
+
+.section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.ats-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.ats-actions button{
+  background:#6366f1;
+  color:#fff;
+  border:none;
+  padding:10px 16px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:14px;
+  white-space:nowrap;
+}
+
+.ats-actions button:hover{ background:#4f46e5; }
+.ats-actions button:disabled{ opacity:.6; cursor:not-allowed; }
+
+.ats-actions button.secondary{
+  background:#334155;
+}
+
+.ats-actions button.secondary:hover{
+  background:#475569;
+}
+
+#ats-frame{
+  width:100%;
+  height:480px;
+  border:none;
+  border-radius:8px;
+  background:#fff;
+  display:block;
+}
+
+#noResumeCta{
+  text-align:center;
+  padding:30px 10px;
+}
+
+#noResumeCta button{
+  margin-top:14px;
+  background:#6366f1;
+  color:#fff;
+  border:none;
+  padding:12px 22px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:14px;
+}
+
+#noResumeCta button:hover{ background:#4f46e5; }
+
+.error-banner{
+  margin-top:15px;
+  background:#7f1d1d;
+  color:#fecaca;
+  padding:12px 18px;
+  border-radius:10px;
+  font-size:14px;
+}
+
+.navbar-right{
+  display:flex;
+  align-items:center;
+  gap:18px;
+}
+
+.user-menu{ position:relative; }
+
+.user-dropdown{
+  display:none;
+  position:absolute;
+  right:0;
+  top:38px;
+  background:#1e293b;
+  border-radius:12px;
+  padding:15px;
+  min-width:190px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.4);
+  z-index:50;
+}
+
+.user-dropdown.show{ display:block; }
+
+.user-dropdown p{ margin-bottom:6px; font-size:14px; word-break:break-all; }
+
+.user-dropdown button{
+  width:100%;
+  margin-top:8px;
+  background:#ef4444;
+  color:#fff;
+  border:none;
+  padding:8px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:14px;
+}
+
+.user-dropdown button:hover{ background:#dc2626; }
+
+#lastUpdated{ display:block; margin-top:6px; }
+.menu-toggle{
+  display:none;
+  font-size:26px;
+  cursor:pointer;
+}
+.help-modal{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.7);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:3000;
+}
+
+.help-box{
+  width:500px;
+  max-height:80vh;
+  overflow-y:auto;
+  background:#1e293b;
+  padding:30px;
+  border-radius:16px;
+  position:relative;
+  border:1px solid rgba(255,255,255,0.08);
+}
+
+.help-box h2{
+  margin-bottom:20px;
+}
+
+.help-section{
+  margin-bottom:20px;
+}
+
+.help-section h3{
+  margin-bottom:8px;
+  color:#a5b4fc;
+}
+
+.help-section p{
+  color:#cbd5e1;
+  margin-bottom:5px;
+  line-height:1.5;
+}
+
+.close-help{
+  position:absolute;
+  top:15px;
+  right:20px;
+  font-size:28px;
+  cursor:pointer;
+}
+
+@media(max-width:768px){
+
+  .menu-toggle{
+    display:block;
+  }
+
+  .sidebar{
+    left:-240px;
+    transition:0.3s;
+    z-index:1000;
+  }
+
+  .sidebar.active{
+    left:0;
+  }
+
+  .main{
+    margin-left:0;
+    width:100%;
+  }
+
+  .navbar{
+    padding:15px 20px;
+  }
+
+  .hero{
+    padding:25px 20px;
+  }
+
+  .stats{
+    padding:0 20px;
+  }
+
+  .roadmap,
+  .tasks,
+  .rewards,
+  .ats-section{
+    margin:20px;
+  }
+
+  .navbar-right{
+    gap:10px;
+  }
+
+  #ats-frame{
+    height:350px;
+  }
+
+}
+
+@media(max-width:768px){
+
+  .ats-actions{
+    width:100%;
+  }
+
+  .ats-actions button{
+    width:100%;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h2>Growth Orbit</h2>
+  <ul>
+    <li>Dashboard</li>
+    <li><a href="resume.html">Resume</a></li>
+    <li onclick="openRoadmap()">Roadmap</li>
+    <li onclick="goToTasks()">Tasks</li>
+  </ul>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <span class="menu-toggle" onclick="toggleSidebar()">☰</span>
+    <h2>Growth Orbit</h2>
+
+    <div class="navbar-right">
+
+      <span class="muted">
+        <span class="live-dot"></span>Live
+      </span>
+
+      <span class="icon" id="helpBtn">❓</span>
+
+      <div class="user-menu">
+        <span class="icon" id="userIcon" onclick="toggleUserMenu()">👤</span>
+
+        <div class="user-dropdown" id="userDropdown">
+          <p id="userName">Loading...</p>
+          <p id="userEmail" class="muted"></p>
+          <button onclick="logout()">Logout</button>
+        </div>
+
+      </div>
+
+    </div>
+</div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1 id="welcome">Welcome</h1>
+    <p>Continue your learning journey</p>
+    <span id="lastUpdated" class="muted"></span>
+    <div id="errorBanner" class="error-banner hidden"></div>
+  </div>
+
+  <!-- STATS (DYNAMIC) -->
+  <div class="stats">
+    <div class="card">
+      <div id="progress">Progress: --</div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+    <div class="card" id="tasksDone">Tasks Done: --</div>
+    <div class="card" id="level">Level: --</div>
+    <div class="card" id="xpCard">XP: --</div>
+    <div class="card" id="streakCard">Streak: --</div>
+    <div class="card" id="roadmap">Roadmap: --</div>
+  </div>
+
+  <!-- ROADMAP -->
+  <div class="roadmap">
+    <h2>Current Roadmap</h2>
+    <p id="roadmapText">Loading...</p>
+    <p id="roadmapPhaseInfo" class="muted"></p>
+    <div class="progress-track"><div class="progress-fill" id="roadmapFill"></div></div>
+    <button class="link-btn" onclick="openRoadmap()">View Roadmap →</button>
+  </div>
+
+  <!-- TASKS -->
+  <div class="tasks">
+    <h2>Tasks</h2>
+    <div id="taskList">Loading tasks...</div>
+    <button class="link-btn" onclick="goToTasks()">Verify a Skill / Add Task →</button>
+  </div>
+
+  <!-- REWARDS -->
+  <div class="rewards">
+    <h2>Rewards</h2>
+    <div id="rewards" class="badge-row">Loading...</div>
+  </div>
+
+  <!-- ATS -->
+  <div class="ats-section">
+    <div class="section-head">
+      <h2>Generated Resume (ATS)</h2>
+      <div class="ats-actions">
+        <span id="atsMeta" class="muted"></span>
+        <button id="generateAtsBtn" onclick="generateATS()">✨ Generate with AI</button>
+        <button class="secondary" onclick="window.location.href='generated-resume.html'">Open Resume</button>
+      </div>
+    </div>
+    <div id="ats-preview">Loading ATS...</div>
+    <div id="noResumeCta" class="hidden">
+      <p>You haven't created a resume yet.</p>
+      <button onclick="window.location.href='resume.html'">Create Resume</button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <h2>Growth Orbit</h2>
+    <p>Empowering student growth</p>
+    <p><i class="fa-solid fa-phone"></i> +91 9770764310 &nbsp;&nbsp;|| &nbsp;&nbsp;<i class="fa-solid fa-envelope"></i> supportgrowthorbit@gmail.com</p>
+
+  </footer>
+  <!-- HELP MODAL -->
+
+<div class="help-modal" id="helpModal">
+
+  <div class="help-box">
+
+    <span class="close-help" id="closeHelp">&times;</span>
+
+    <h2>Help Center</h2>
+
+    <div class="help-section">
+
+      <h3>1. About Platform</h3>
+
+      <p>
+        Growth Orbit helps students track skills,
+        roadmap, resume, and tasks.
+      </p>
+
+    </div>
+
+    <div class="help-section">
+
+      <h3>2. Contact Support</h3>
+
+      <p>Email: supportgrowthorbit@gmail.com</p>
+
+      <p>Phone: +91 9109753863</p>
+
+    </div>
+
+    <div class="help-section">
+
+      <h3>3. FAQ</h3>
+
+      <p>• How to update resume?</p>
+
+      <p>• How roadmap works?</p>
+
+      <p>• How to reset password?</p>
+
+    </div>
+
+    <div class="help-section">
+
+      <h3>4. Report Bug</h3>
+
+      <p>
+        Found an issue? Report it to support.
+      </p>
+
+    </div>
+
+    <div class="help-section">
+
+      <h3>5. User Guide</h3>
+
+      <p>1. Create resume</p>
+
+      <p>2. Follow roadmap</p>
+
+      <p>3. Improve skills</p>
+
+      <p>4. Complete tasks</p>
+
+    </div>
+
+    <div class="help-section">
+
+      <h3>6. Version Info</h3>
+
+      <p>Growth Orbit v1.0</p>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<script>
+
+/* ==============================
+   CONFIG
+============================== */
+
+const API_BASE = "http://localhost:5000/api/v1";
+
+function getToken(){
+  return localStorage.getItem("token");
+}
+
+function authHeaders(){
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${getToken()}`
+  };
+}
+
+function goToLogin(){
+  localStorage.removeItem("token");
+  localStorage.removeItem("isLoggedIn");
+  window.location.href = "growthorbit-login.html";
+}
+
+/* ==============================
+   API HELPER (handles auth + errors)
+============================== */
+
+async function apiGet(path){
+  const res = await fetch(`${API_BASE}${path}`, { headers: authHeaders() });
+
+  if(res.status === 401){
+    goToLogin();
+    return null;
+  }
+
+  const json = await res.json();
+
+  if(!res.ok){
+    throw new Error(json.message || `Request failed (${res.status})`);
+  }
+
+  return json;
+}
+
+/* ==============================
+   ERROR BANNER
+============================== */
+
+function showError(msg){
+  const el = document.getElementById("errorBanner");
+  el.innerText = msg;
+  el.classList.remove("hidden");
+}
+
+function hideError(){
+  document.getElementById("errorBanner").classList.add("hidden");
+}
+
+/* ==============================
+   USER INFO
+============================== */
+
+async function loadUser(){
+  try{
+    const json = await apiGet("/auth/me");
+    if(!json) return;
+
+    const user = json.data || {};
+
+    document.getElementById("welcome").innerText =
+      `Welcome back, ${user.name || "there"} 👋`;
+
+    document.getElementById("userName").innerText = user.name || "User";
+    document.getElementById("userEmail").innerText = user.email || "";
+  }catch(err){
+    console.error("User load error:", err);
+  }
+}
+
+/* ==============================
+   REAL-TIME DASHBOARD ENGINE
+============================== */
+
+async function loadDashboard(){
+
+  try{
+
+    const json = await apiGet("/dashboard");
+    if(!json) return;
+
+    const data = json.data || {};
+    const qs = data.quickStats || {};
+
+    hideError();
+
+    // STATS
+    const pct = Math.max(0, Math.min(100, Number(data.progress) || 0));
+
+    document.getElementById("progress").innerText =
+      `Progress: ${pct}%`;
+
+    document.getElementById("progressFill").style.width = `${pct}%`;
+
+    document.getElementById("tasksDone").innerText =
+      `Tasks Done: ${data.tasksDone || 0}`;
+
+    document.getElementById("level").innerText =
+      `Level: ${data.level || "Beginner"}`;
+
+    document.getElementById("roadmap").innerText =
+      `Roadmap: ${data.roadmap || "Not set"}`;
+
+    document.getElementById("xpCard").innerText =
+      `XP: ${qs.totalXP ?? 0}`;
+
+    document.getElementById("streakCard").innerText =
+      `Streak: ${qs.streak ?? 0} 🔥`;
+
+    // ROADMAP TEXT + PROGRESS
+    document.getElementById("roadmapText").innerText =
+      data.nextStep || "No roadmap available";
+
+    const rd = data.roadmapDetails;
+
+    if(rd && rd.totalPhases){
+      const rPct = Math.round((rd.completedPhases / rd.totalPhases) * 100);
+      document.getElementById("roadmapPhaseInfo").innerText =
+        `${rd.completedPhases} / ${rd.totalPhases} phases completed`;
+      document.getElementById("roadmapFill").style.width = `${rPct}%`;
+    }else{
+      document.getElementById("roadmapPhaseInfo").innerText =
+        rd ? "" : "No active roadmap yet";
+      document.getElementById("roadmapFill").style.width = "0%";
+    }
+
+    // TASKS
+    const tasks = data.tasks || [];
+
+    document.getElementById("taskList").innerHTML = tasks.length
+      ? tasks.map(t => `<div class="task">${t}<span class="task-status">In Progress</span></div>`).join("")
+      : `<div class="task empty">No active tasks. Great job staying on track! 🎉</div>`;
+
+    // REWARDS
+    const rewards = data.rewards || [];
+
+    document.getElementById("rewards").innerHTML =
+      (rewards.length && rewards[0] !== "No rewards yet")
+        ? rewards.map(r => `<span class="badge">🏆 ${r}</span>`).join("")
+        : `<span class="badge muted">No rewards yet — keep going!</span>`;
+
+    // ATS / RESUME
+    renderAts(data, qs);
+
+    // TIMESTAMP
+    document.getElementById("lastUpdated").innerText =
+      `Last updated: ${new Date().toLocaleTimeString()}`;
+
+  }catch(err){
+    console.error("Dashboard error:", err);
+    showError("⚠ Couldn't load dashboard data. Make sure the Growth Orbit server is running on http://localhost:5000.");
+  }
+}
+
+/* ==============================
+   ATS / RESUME RENDERING
+============================== */
+
+function renderAts(data, qs){
+
+  const preview = document.getElementById("ats-preview");
+  const noResumeCta = document.getElementById("noResumeCta");
+  const generateBtn = document.getElementById("generateAtsBtn");
+  const atsMeta = document.getElementById("atsMeta");
+
+  if(!qs.hasResume){
+    preview.classList.add("hidden");
+    noResumeCta.classList.remove("hidden");
+    generateBtn.disabled = true;
+    atsMeta.innerText = "";
+    return;
+  }
+
+  noResumeCta.classList.add("hidden");
+  preview.classList.remove("hidden");
+  generateBtn.disabled = false;
+
+  let frame = document.getElementById("ats-frame");
+
+  if(!frame){
+    preview.innerHTML = "";
+    frame = document.createElement("iframe");
+    frame.id = "ats-frame";
+    preview.appendChild(frame);
+  }
+
+  // Use srcdoc via property assignment to avoid any escaping issues
+  frame.srcdoc = data.atsHtml || "<p>No ATS available</p>";
+
+  if(qs.hasAtsResume && qs.atsGeneratedAt){
+    atsMeta.innerText = `Updated: ${new Date(qs.atsGeneratedAt).toLocaleString()}`;
+  }else{
+    atsMeta.innerText = "Not generated yet";
+  }
+}
+
+/* ==============================
+   AI ATS GENERATION
+============================== */
+
+async function generateATS(){
+
+  const btn = document.getElementById("generateAtsBtn");
+  const original = btn.innerText;
+
+  try{
+
+    btn.disabled = true;
+    btn.innerText = "✨ Generating with AI...";
+
+    const res = await fetch(`${API_BASE}/resume/generate-ats`, {
+      method: "POST",
+      headers: authHeaders()
+    });
+
+    if(res.status === 401){
+      goToLogin();
+      return;
+    }
+
+    const json = await res.json();
+
+    if(!res.ok){
+      throw new Error(json.message || "ATS generation failed");
+    }
+
+    await loadDashboard();
+
+  }catch(err){
+    console.error("ATS generation error:", err);
+    alert(err.message || "ATS generation failed. Please try again.");
+  }finally{
+    btn.disabled = false;
+    btn.innerText = original;
+  }
+}
+
+/* ==============================
+   USER MENU / LOGOUT
+============================== */
+
+function toggleUserMenu(){
+  document.getElementById("userDropdown").classList.toggle("show");
+}
+
+document.addEventListener("click", (e) => {
+  const dropdown = document.getElementById("userDropdown");
+  const icon = document.getElementById("userIcon");
+  if(dropdown && dropdown.classList.contains("show") && e.target !== icon && !dropdown.contains(e.target)){
+    dropdown.classList.remove("show");
+  }
+});
+
+function logout(){
+  goToLogin();
+}
+
+/* ==============================
+   INIT + REAL-TIME LOOP
+============================== */
+
+window.addEventListener("load", () => {
+
+  if(!getToken()){
+    goToLogin();
+    return;
+  }
+
+  loadUser();
+  loadDashboard();
+
+  // Refresh dashboard data periodically (near real-time)
+  setInterval(loadDashboard, 8000);
+
+});
+
+/* NAV FUNCTIONS */
+function openRoadmap(){
+  window.location.href = "roadmap.html";
+}
+
+function goToTasks(){
+  window.location.href = "task.html";
+}
+function toggleSidebar(){
+  document
+    .querySelector(".sidebar")
+    .classList
+    .toggle("active");
+}
+
+document.addEventListener("click",(e)=>{
+
+  const sidebar =
+    document.querySelector(".sidebar");
+
+  const toggle =
+    document.querySelector(".menu-toggle");
+
+  if(
+    window.innerWidth <= 768 &&
+    !sidebar.contains(e.target) &&
+    !toggle.contains(e.target)
+  ){
+    sidebar.classList.remove("active");
+  }
+
+});
+const helpModal = document.getElementById("helpModal");
+const helpBtn = document.getElementById("helpBtn");
+const closeHelp = document.getElementById("closeHelp");
+
+helpBtn.addEventListener("click", () => {
+  helpModal.style.display = "flex";
+});
+
+closeHelp.addEventListener("click", () => {
+  helpModal.style.display = "none";
+});
+
+window.addEventListener("click", (e) => {
+  if(e.target === helpModal){
+    helpModal.style.display = "none";
+  }
+});
+
+</script>
+
+</body>
+</html>
