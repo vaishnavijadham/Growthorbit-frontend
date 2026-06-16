@@ -723,7 +723,7 @@ async function loadUser(){
     const user = json.data || {};
 
     document.getElementById("welcome").innerText =
-      `Welcome back, ${user.name || "there"} 👋`;
+      `Welcome back, ${user.name || "there"} `;
 
     document.getElementById("userName").innerText = user.name || "User";
     document.getElementById("userEmail").innerText = user.email || "";
@@ -769,7 +769,7 @@ async function loadDashboard(){
       `XP: ${qs.totalXP ?? 0}`;
 
     document.getElementById("streakCard").innerText =
-      `Streak: ${qs.streak ?? 0} 🔥`;
+      `Streak: ${qs.streak ?? 0} `;
 
     // ROADMAP TEXT + PROGRESS
     document.getElementById("roadmapText").innerText =
