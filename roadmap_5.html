@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Roadmap Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #050a0e;
+    --surface: #0d1b24;
+    --border: #1a3040;
+    --accent: #00e5ff;
+    --accent2: #ff6b35;
+    --text: #e8f4f8;
+    --muted: #5a7a8a;
+    --success: #00ffa3;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px 80px;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeDown 0.7s ease both;
+  }
+
+  .badge {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 14px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    opacity: 0.8;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 6vw, 60px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -1px;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 32px;
+    width: 100%;
+    max-width: 560px;
+    animation: fadeUp 0.7s 0.15s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), transparent);
+  }
+
+  .field {
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    padding: 12px 14px;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300e5ff' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    transition: border-color 0.2s;
+  }
+
+  select:focus, select:hover { border-color: var(--accent); }
+  select option { background: #0d1b24; }
+
+  .btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 14px;
+    background: var(--accent);
+    color: var(--bg);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  .btn:hover { opacity: 0.88; }
+  .btn:active { transform: scale(0.99); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Output area */
+  #output-wrap {
+    width: 100%;
+    max-width: 760px;
+    margin-top: 32px;
+    animation: fadeUp 0.5s ease both;
+    display: none;
+  }
+
+  #output-wrap.visible { display: block; }
+
+  .output-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .output-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .tag {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 2px;
+    background: rgba(0,229,255,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(0,229,255,0.25);
+  }
+
+  /* Roadmap steps */
+  .roadmap {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .step {
+    display: flex;
+    gap: 0;
+    opacity: 0;
+    transform: translateX(-12px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .step.show { opacity: 1; transform: translateX(0); }
+
+  .step-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 48px;
+    flex-shrink: 0;
+  }
+
+  .step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .step-line {
+    width: 2px;
+    flex: 1;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+    min-height: 20px;
+    opacity: 0.3;
+  }
+
+  .step-last .step-line { display: none; }
+
+  .step-content {
+    padding: 4px 0 28px 16px;
+    flex: 1;
+  }
+
+  .step-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .step-desc {
+    font-size: 12px;
+    line-height: 1.7;
+    color: #8aaabb;
+  }
+
+  .step-resources {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .res-tag {
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 2px;
+    background: rgba(255,107,53,0.1);
+    color: var(--accent2);
+    border: 1px solid rgba(255,107,53,0.2);
+    text-transform: uppercase;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  a.res-tag:hover {
+    background: rgba(255,107,53,0.25);
+    color: #ffaa80;
+  }
+
+  .free-badge {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 2px;
+    background: rgba(0,255,163,0.1);
+    color: var(--success);
+    border: 1px solid rgba(0,255,163,0.2);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    vertical-align: middle;
+    margin-left: 4px;
+  }
+
+  .courses-section {
+    margin-top: 14px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+
+  .courses-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--success);
+    margin-bottom: 8px;
+  }
+
+  /* Loading state */
+  .loading-wrap {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+
+  .stream-text {
+    white-space: pre-wrap;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+    display: none;
+  }
+
+  .error-box {
+    padding: 16px 20px;
+    background: rgba(255,60,60,0.08);
+    border: 1px solid rgba(255,60,60,0.25);
+    border-radius: 4px;
+    color: #ff8080;
+    font-size: 13px;
+    display: none;
+  }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="header">
+    <div class="badge">AI-Powered</div>
+    <h1>Career <span>Roadmap</span><br/>Generator</h1>
+    <p class="subtitle">// select your path. get your plan.</p>
+  </div>
+
+  <div class="card">
+    <div class="field">
+      <label>01 — Course</label>
+      <select id="course" onchange="loadSubCourses()">
+        <option value="">Select Course</option>
+        <option value="btech">B.Tech</option>
+        <option value="bca">BCA</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>02 — Specialisation</label>
+      <select id="subcourse" onchange="loadRoles()">
+        <option value="">Select Sub Course</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>03 — Target Role</label>
+      <select id="role">
+        <option value="">Select Role</option>
+      </select>
+    </div>
+
+    <button class="btn" id="genBtn" onclick="generateRoadmap()">Generate Roadmap →</button>
+  </div>
+
+  <div id="output-wrap">
+    <div class="output-header">
+      <h2 id="output-title">Your Roadmap</h2>
+      <span class="tag" id="output-tag">AI Generated</span>
+    </div>
+    <div class="loading-wrap" id="loading" style="display:none">
+      <div class="spinner"></div>
+      <span>Generating your personalised roadmap…</span>
+    </div>
+    <div class="error-box" id="error-box"></div>
+    <div class="roadmap" id="roadmap-steps"></div>
+  </div>
+
+</div>
+
+<script>
+// ─── FREE CERTIFIED COURSES DATABASE ────────────────────────────────────────
+const FREE_COURSES = {
+  "html": [
+    { name:"IBM SkillsBuild", url:"https://skillsbuild.org/adult-learners/explore-learning/web-developer", badge:"Free Badge" },
+    { name:"Microsoft Learn", url:"https://learn.microsoft.com/en-us/training/paths/web-development-101/", badge:"Free" },
+    { name:"freeCodeCamp", url:"https://www.freecodecamp.org/learn/responsive-web-design-v9/", badge:"Free Cert" },
+    { name:"Cisco NetAcad", url:"https://www.netacad.com/courses/web-design", badge:"Free" }
+  ],
+  "css": [
+    { name:"W3C / edX", url:"https://www.edx.org/learn/css/world-wide-web-consortium-w3c-css-basics", badge:"Free Audit" },
+    { name:"freeCodeCamp", url:"https://www.freecodecamp.org/learn/responsive-web-design-v9/", badge:"Free Cert" },
+    { name:"Microsoft Learn", url:"https://learn.microsoft.com/en-us/training/paths/web-development-101/", badge:"Free" }
+  ],
+  "javascript": [
+    { name:"freeCodeCamp JS", url:"https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures-v8/", badge:"Free Cert" },
+    { name:"Cisco JS Essentials", url:"https://www.netacad.com/courses/javascript-essentials-1", badge:"Free" },
+    { name:"Microsoft Learn", url:"https://learn.microsoft.com/en-us/training/paths/web-development-101/", badge:"Free" }
+  ],
+  "responsive": [
+    { name:"freeCodeCamp RWD", url:"https://www.freecodecamp.org/learn/responsive-web-design-v9/", badge:"Free Cert" },
+    { name:"W3C HTML5 / edX", url:"https://www.edx.org/learn/html5/world-wide-web-consortium-w3c-html5-coding-essentials-and-best-practices", badge:"Free Audit" }
+  ],
+  "bootstrap": [
+    { name:"freeCodeCamp", url:"https://www.freecodecamp.org/learn/front-end-development-libraries/", badge:"Free Cert" },
+    { name:"Scrimba", url:"https://scrimba.com/learn/bootstrap4", badge:"Free" }
+  ],
+  "tailwind": [
+    { name:"freeCodeCamp Tailwind", url:"https://www.freecodecamp.org/news/learn-tailwind-css/", badge:"Free" },
+    { name:"Scrimba", url:"https://scrimba.com/learn/tailwind", badge:"Free" }
+  ],
+  "react": [
+    { name:"freeCodeCamp React", url:"https://www.freecodecamp.org/learn/front-end-development-libraries/", badge:"Free Cert" },
+    { name:"IBM React Badge", url:"https://www.ibm.com/training/badge/developing-cloud-apps-with-node-js-and-react", badge:"Credly Badge" },
+    { name:"Microsoft Learn React", url:"https://learn.microsoft.com/en-us/training/paths/react/", badge:"Free" },
+    { name:"Scrimba React", url:"https://scrimba.com/learn/learnreact", badge:"Free" }
+  ],
+  "api": [
+    { name:"Postman Academy", url:"https://academy.postman.com/page/postman-api-fundamentals-student-expert-certification-1", badge:"Free Badge" },
+    { name:"Microsoft Learn APIs", url:"https://learn.microsoft.com/en-us/training/modules/use-apis-discover-museum-art/", badge:"Free" }
+  ],
+  "node": [
+    { name:"IBM Node & Express", url:"https://www.ibm.com/training/badge/node-and-express-essentials", badge:"Credly Badge" },
+    { name:"Microsoft Node.js", url:"https://learn.microsoft.com/en-us/training/paths/build-javascript-applications-nodejs/", badge:"Free" },
+    { name:"freeCodeCamp Backend", url:"https://www.freecodecamp.org/learn/back-end-development-and-apis/", badge:"Free Cert" }
+  ],
+  "express": [
+    { name:"IBM Node & Express", url:"https://www.credly.com/org/ibm/badge/node-and-express-essentials", badge:"Credly Badge" },
+    { name:"freeCodeCamp Backend", url:"https://www.freecodecamp.org/learn/back-end-development-and-apis/", badge:"Free Cert" }
+  ],
+  "rest": [
+    { name:"Postman Academy", url:"https://academy.postman.com/page/postman-api-fundamentals-student-expert-certification-1", badge:"Free Badge" },
+    { name:"freeCodeCamp Backend", url:"https://www.freecodecamp.org/learn/back-end-development-and-apis/", badge:"Free Cert" },
+    { name:"Microsoft REST APIs", url:"https://learn.microsoft.com/en-us/training/modules/use-apis-discover-museum-art/", badge:"Free" }
+  ],
+  "auth": [
+    { name:"Microsoft Auth/Azure AD", url:"https://learn.microsoft.com/en-us/training/paths/implement-authentication-authorization-using-azure-ad/", badge:"Free" },
+    { name:"Cisco Endpoint Security", url:"https://www.netacad.com/courses/endpoint-security", badge:"Free" }
+  ],
+  "mongodb": [
+    { name:"MongoDB University", url:"https://learn.mongodb.com/pages/learner-badges", badge:"Free Badge" },
+    { name:"freeCodeCamp Backend", url:"https://www.freecodecamp.org/learn/back-end-development-and-apis/", badge:"Free Cert" },
+    { name:"Microsoft Learn MongoDB", url:"https://learn.microsoft.com/en-us/training/modules/introduction-to-mongodb/", badge:"Free" }
+  ],
+  "mysql": [
+    { name:"Oracle MySQL Explorer", url:"https://learn.oracle.com/ols/learning-path/mysql-explorer/132718/79674", badge:"Free Badge" },
+    { name:"freeCodeCamp Relational DB", url:"https://www.freecodecamp.org/learn/relational-database/", badge:"Free Cert" },
+    { name:"Cisco Data Analytics", url:"https://www.netacad.com/courses/data-analytics-essentials", badge:"Free" }
+  ],
+  "database": [
+    { name:"MongoDB University", url:"https://learn.mongodb.com/pages/learner-badges", badge:"Free Badge" },
+    { name:"Oracle MySQL Explorer", url:"https://learn.oracle.com/ols/learning-path/mysql-explorer/132718/79674", badge:"Free Badge" },
+    { name:"freeCodeCamp Relational DB", url:"https://www.freecodecamp.org/learn/relational-database/", badge:"Free Cert" }
+  ],
+  "git": [
+    { name:"GitHub Skills", url:"https://skills.github.com/", badge:"Free Badges" },
+    { name:"Microsoft Learn Git", url:"https://learn.microsoft.com/en-us/training/paths/intro-to-vc-git/", badge:"Free" }
+  ],
+  "github": [
+    { name:"GitHub Skills", url:"https://skills.github.com/", badge:"Free Badges" },
+    { name:"Microsoft Learn Git", url:"https://learn.microsoft.com/en-us/training/paths/intro-to-vc-git/", badge:"Free" }
+  ],
+  "debugging": [
+    { name:"Google Web.dev DevTools", url:"https://web.dev/learn/", badge:"Free" },
+    { name:"Microsoft Debug Node.js", url:"https://learn.microsoft.com/en-us/training/modules/debug-nodejs/", badge:"Free" }
+  ],
+  "docker": [
+    { name:"IBM Docker SkillsBuild", url:"https://skillsbuild.org/adult-learners/explore-learning/web-developer", badge:"Free Badge" },
+    { name:"Microsoft Docker Intro", url:"https://learn.microsoft.com/en-us/training/paths/intro-to-docker-containers/", badge:"Free" },
+    { name:"freeCodeCamp Docker", url:"https://www.freecodecamp.org/news/the-docker-handbook/", badge:"Free" },
+    { name:"Cisco DevASC", url:"https://www.netacad.com/courses/devasc", badge:"Free" }
+  ],
+  "deployment": [
+    { name:"Vercel Docs", url:"https://vercel.com/docs", badge:"Free" },
+    { name:"Render Docs", url:"https://render.com/docs", badge:"Free" },
+    { name:"freeCodeCamp Deploy", url:"https://www.freecodecamp.org/news/how-to-deploy-websites-and-apps/", badge:"Free" }
+  ],
+  "dsa": [
+    { name:"freeCodeCamp DSA", url:"https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures-v8/", badge:"Free Cert" },
+    { name:"Microsoft DSA", url:"https://learn.microsoft.com/en-us/training/paths/data-structures-algorithms/", badge:"Free" },
+    { name:"Cisco Python Essentials", url:"https://www.netacad.com/courses/python-essentials-1", badge:"Free" }
+  ],
+  "python": [
+    { name:"Cisco Python Essentials", url:"https://www.netacad.com/courses/python-essentials-1", badge:"Free" },
+    { name:"IBM SkillsBuild", url:"https://skillsbuild.org/adult-learners/explore-learning", badge:"Free Badge" }
+  ],
+  "uiux": [
+    { name:"Google UX Design (Coursera)", url:"https://www.coursera.org/professional-certificates/google-ux-design", badge:"Free Audit" },
+    { name:"IBM UX Badge", url:"https://skillsbuild.org/adult-learners/explore-learning", badge:"Free Badge" },
+    { name:"Microsoft UX Learn", url:"https://learn.microsoft.com/en-us/training/paths/ux-design/", badge:"Free" },
+    { name:"Adobe XD Tutorials", url:"https://helpx.adobe.com/xd/tutorials.html", badge:"Free" }
+  ],
+  "security": [
+    { name:"Cisco Endpoint Security", url:"https://www.netacad.com/courses/endpoint-security", badge:"Free" },
+    { name:"IBM SkillsBuild", url:"https://skillsbuild.org/adult-learners/explore-learning/web-developer", badge:"Free Badge" }
+  ],
+  "frontend": [
+    { name:"freeCodeCamp Frontend Libs", url:"https://www.freecodecamp.org/learn/front-end-development-libraries/", badge:"Free Cert" },
+    { name:"Microsoft Learn Frontend", url:"https://learn.microsoft.com/en-us/training/paths/web-development-101/", badge:"Free" }
+  ],
+  "backend": [
+    { name:"freeCodeCamp Backend & APIs", url:"https://www.freecodecamp.org/learn/back-end-development-and-apis/", badge:"Free Cert" },
+    { name:"IBM Node & Express", url:"https://www.ibm.com/training/badge/node-and-express-essentials", badge:"Credly Badge" }
+  ]
+};
+
+// keyword → course keys mapping
+const KEYWORD_MAP = [
+  { keys:["html","markup","structure","webpage"],        courses:["html"] },
+  { keys:["css","styling","style","design","layout"],    courses:["css","tailwind","bootstrap"] },
+  { keys:["javascript","js","dom","scripting"],          courses:["javascript"] },
+  { keys:["responsive","mobile-first","viewport"],       courses:["responsive"] },
+  { keys:["bootstrap"],                                  courses:["bootstrap"] },
+  { keys:["tailwind"],                                   courses:["tailwind"] },
+  { keys:["react","component","jsx","state"],            courses:["react"] },
+  { keys:["api","fetch","axios","http","rest"],          courses:["api","rest"] },
+  { keys:["node","nodejs","server","backend"],           courses:["node","backend"] },
+  { keys:["express","framework","route","middleware"],   courses:["express"] },
+  { keys:["auth","authentication","jwt","oauth","login"],courses:["auth","security"] },
+  { keys:["mongodb","nosql","mongoose","document"],      courses:["mongodb","database"] },
+  { keys:["mysql","sql","relational","postgres"],        courses:["mysql","database"] },
+  { keys:["database","db","data storage"],               courses:["database"] },
+  { keys:["git","github","version control","vcs"],       courses:["git","github"] },
+  { keys:["docker","container","kubernetes"],            courses:["docker"] },
+  { keys:["deploy","deployment","vercel","render","cloud","hosting"], courses:["deployment"] },
+  { keys:["debug","devtools","testing","browser"],       courses:["debugging"] },
+  { keys:["dsa","algorithm","data structure","leetcode","complexity"], courses:["dsa"] },
+  { keys:["python","pandas","numpy","ml","machine learning","scikit"], courses:["python","dsa"] },
+  { keys:["uiux","ui/ux","ux","design","figma","wireframe","prototype"], courses:["uiux"] },
+  { keys:["security","cyber","hacking","vulnerability","soc"],           courses:["security"] },
+  { keys:["frontend","front-end"],                       courses:["frontend"] },
+];
+
+function matchCourses(title, description, skillKeys) {
+  const haystack = (title + " " + description + " " + (skillKeys||[]).join(" ")).toLowerCase();
+  const matched = new Set();
+  for(const entry of KEYWORD_MAP){
+    if(entry.keys.some(k => haystack.includes(k))){
+      entry.courses.forEach(c => matched.add(c));
+    }
+  }
+  // collect up to 4 unique course objects
+  const result = [];
+  for(const key of matched){
+    if(!FREE_COURSES[key]) continue;
+    for(const c of FREE_COURSES[key]){
+      if(result.length >= 4) break;
+      if(!result.find(r => r.url === c.url)) result.push(c);
+    }
+    if(result.length >= 4) break;
+  }
+  return result;
+}
+
+// ─── APP DATA ────────────────────────────────────────────────────────────────
+const rolesData = {
+  btech: {
+    cse:   ["Web Developer","App Developer","Software Engineer","DevOps Engineer","Backend Developer"],
+    aiml:  ["ML Engineer","Data Scientist","AI Researcher","NLP Engineer"],
+    cyber: ["Cyber Security Analyst","Ethical Hacker","SOC Analyst"],
+    data:  ["Data Analyst","Business Intelligence Analyst","Data Engineer"]
+  },
+  bca: {
+    general: ["Web Developer","Backend Developer","Mobile Developer","UI/UX Designer"]
+  }
+};
+
+const subLabels = {
+  cse:"CSE", aiml:"AI/ML", cyber:"Cyber Security", data:"Data Analytics", general:"General"
+};
+
+function loadSubCourses(){
+  const course = document.getElementById("course").value;
+  const sub = document.getElementById("subcourse");
+  sub.innerHTML = "<option value=''>Select Sub Course</option>";
+  if(course === "btech"){
+    sub.innerHTML += `
+      <option value="cse">CSE</option>
+      <option value="aiml">AI / ML</option>
+      <option value="cyber">Cyber Security</option>
+      <option value="data">Data Analytics</option>`;
+  } else if(course === "bca"){
+    sub.innerHTML += `<option value="general">General</option>`;
+  }
+  document.getElementById("role").innerHTML = "<option value=''>Select Role</option>";
+}
+
+function loadRoles(){
+  const course = document.getElementById("course").value;
+  const sub = document.getElementById("subcourse").value;
+  const roleSelect = document.getElementById("role");
+  roleSelect.innerHTML = "<option value=''>Select Role</option>";
+  if(rolesData[course]?.[sub]){
+    rolesData[course][sub].forEach(r => {
+      roleSelect.innerHTML += `<option value="${r}">${r}</option>`;
+    });
+  }
+}
+
+// ─── GENERATE ────────────────────────────────────────────────────────────────
+async function generateRoadmap(){
+  const course    = document.getElementById("course").value;
+  const subcourse = document.getElementById("subcourse").value;
+  const role      = document.getElementById("role").value;
+
+  if(!course || !subcourse || !role){
+    alert("Please select all three fields first.");
+    return;
+  }
+
+  const btn = document.getElementById("genBtn");
+  btn.disabled = true;
+  btn.textContent = "Generating…";
+
+  const wrap = document.getElementById("output-wrap");
+  wrap.classList.add("visible");
+  document.getElementById("output-title").textContent = `${role} Roadmap`;
+  document.getElementById("output-tag").textContent =
+    `${course.toUpperCase()} › ${subLabels[subcourse] || subcourse}`;
+
+  const loading = document.getElementById("loading");
+  const stepsEl = document.getElementById("roadmap-steps");
+  const errorEl = document.getElementById("error-box");
+
+  loading.style.display = "flex";
+  stepsEl.innerHTML = "";
+  errorEl.style.display = "none";
+
+  const prompt = `You are an expert career counsellor for Indian engineering students.
+
+Create a detailed, practical career roadmap for a ${course.toUpperCase()} student (${subLabels[subcourse]||subcourse} specialisation) who wants to become a ${role}.
+
+Return ONLY a JSON array (no markdown, no extra text) in this exact shape:
+[
+  {
+    "step": 1,
+    "title": "Step title (4-6 words)",
+    "description": "2-3 sentences: what to learn, why it matters, approximate timeframe.",
+    "skills": ["keyword1","keyword2","keyword3"]
+  }
+]
+
+Skills should be lowercase technology/topic keywords like: html, css, javascript, react, node, express, mongodb, mysql, git, docker, deployment, dsa, python, uiux, auth, api, rest, security, responsive, frontend, backend, debugging.
+
+Include 7-9 steps covering: foundational skills → core technical skills → tools & frameworks → projects → internships/open-source → job prep → career growth.`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 2000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+
+    if(!res.ok){
+      const err = await res.json().catch(()=>({}));
+      throw new Error(err?.error?.message || `HTTP ${res.status}`);
+    }
+
+    const d = await res.json();
+    const raw = d.content?.map(b => b.text||"").join("").trim();
+
+    let steps;
+    try {
+      const clean = raw.replace(/^```[a-z]*\n?/i,"").replace(/```$/,"").trim();
+      steps = JSON.parse(clean);
+    } catch(e){
+      throw new Error("Could not parse AI response. Please try again.");
+    }
+
+    loading.style.display = "none";
+    renderSteps(steps);
+
+  } catch(err){
+    loading.style.display = "none";
+    errorEl.style.display = "block";
+    errorEl.textContent = "⚠ " + err.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Generate Roadmap →";
+  }
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function renderSteps(steps){
+  const container = document.getElementById("roadmap-steps");
+  container.innerHTML = "";
+
+  steps.forEach((s, i) => {
+    const isLast = i === steps.length - 1;
+    const div = document.createElement("div");
+    div.className = "step" + (isLast ? " step-last" : "");
+
+    // match free courses for this step
+    const freeCourses = matchCourses(s.title, s.description, s.skills||[]);
+
+    const freeHTML = freeCourses.length ? `
+      <div class="courses-section">
+        <div class="courses-label">🎓 Free Certified Courses</div>
+        <div class="step-resources">
+          ${freeCourses.map(c => `
+            <a class="res-tag" href="${c.url}" target="_blank" rel="noopener">
+              ${c.name} <span class="free-badge">${c.badge}</span>
+            </a>`).join("")}
+        </div>
+      </div>` : "";
+
+    div.innerHTML = `
+      <div class="step-left">
+        <div class="step-num">${s.step || i+1}</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-content">
+        <div class="step-title">${s.title}</div>
+        <div class="step-desc">${s.description}</div>
+        ${freeHTML}
+      </div>`;
+
+    container.appendChild(div);
+    setTimeout(() => div.classList.add("show"), 60 * i);
+  });
+}
+</script>
+</body>
+</html>
