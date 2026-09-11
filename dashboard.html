@@ -524,7 +524,7 @@ footer p { color: var(--text-dim); font-size: 0.9rem; }
    CONFIG
 ============================== */
 
-const API_BASE = "http://localhost:5000/api/v1";
+const API_BASE = "https://growthorbit-backend.onrender.com/api/v1";
 
 function getToken(){
   return localStorage.getItem("token");
@@ -679,7 +679,7 @@ async function loadDashboard(){
 
   }catch(err){
     console.error("Dashboard error:", err);
-    showError("⚠ Couldn't load dashboard data. Make sure the Growth Orbit server is running on http://localhost:5000.");
+    showError("⚠ Couldn't load dashboard data. Make sure the Growth Orbit server is running on https://growthorbit-backend.onrender.com");
   }
 }
 
