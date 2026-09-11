@@ -7,10 +7,8 @@
 
 <style>
 :root {
-  --bg-dark: #0a081a;
   --primary: #00d2ff;
   --secondary: #9d50bb;
-  --glass: rgba(255, 255, 255, 0.03);
   --glass-border: rgba(255, 255, 255, 0.1);
   --text-dim: #b0b0d0;
 }
@@ -22,200 +20,190 @@
   font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
-body{
-  background-color: var(--bg-dark);
+body {
   color: white;
-  height:100vh ;
-  padding: 30px; /* FIXED */
+  min-height: 100vh;
+  padding: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  position: relative;
 }
 
+/* ====theme=====*/
+.bg {
+    background: url(https://i.ibb.co/87GbbFP/2799006.jpg);
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    width: 100%;
+    position: fixed; 
+    top: 0;
+    left: 0;
+    z-index: -3; 
+}
+.bg:before {
+    content: "";
+    width: 100%;
+    height: 100%;
+    background: #000;
+    position: fixed;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    opacity: 0.3;
+}
+
+/* === Star Field Animation === */
+@keyframes sf-fly-by-1 { from { transform: translateZ(-600px); opacity: 0.5; } to { transform: translateZ(0); opacity: 0.5; } }
+@keyframes sf-fly-by-2 { from { transform: translateZ(-1200px); opacity: 0.5; } to { transform: translateZ(-600px); opacity: 0.5; } }
+@keyframes sf-fly-by-3 { from { transform: translateZ(-1800px); opacity: 0.5; } to { transform: translateZ(-1200px); opacity: 0.5; } }
+
+.star-field {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100vh;
+    perspective: 600px; -webkit-perspective: 600px; z-index: -2;
+}
+.star-field .layer {
+    box-shadow: -411px -476px #cccccc, 777px -407px #d4d4d4, -387px -477px #fcfcfc, -91px -235px #d4d4d4, 491px -460px #f7f7f7, 892px -128px #f7f7f7, 758px -277px #ededed, 596px 378px #cccccc, 647px 423px whitesmoke, 183px 389px #c7c7c7, 524px -237px #f0f0f0, 679px -535px #e3e3e3, 158px 399px #ededed, 157px 249px #ededed, 81px -450px #ebebeb, 719px -360px #c2c2c2, -499px 473px #e8e8e8, -158px -349px #d4d4d4, 870px -134px #cfcfcf, 446px 404px #c2c2c2;
+    transform-style: preserve-3d;
+    position: absolute; top: 50%; left: 50%;
+    height: 4px; width: 4px; border-radius: 2px;
+}
+.star-field .layer:nth-child(1) { animation: sf-fly-by-1 5s linear infinite; }
+.star-field .layer:nth-child(2) { animation: sf-fly-by-2 5s linear infinite; }
+.star-field .layer:nth-child(3) { animation: sf-fly-by-3 5s linear infinite; }
+
+/* === Transparent Glass Box === */
 .form-side {
-  padding: 50px;
+  width: 100%;
+  max-width: 420px;
+  padding: 50px 40px;
   display: flex;
-  flex-direction: column ;
+  flex-direction: column;
   justify-content: center;
+  position: relative;
+  z-index: 10;
+  
+  
+  background: rgba(15, 12, 41, 0.4); 
+  backdrop-filter: blur(0.2px); 
+  -webkit-backdrop-filter: blur(0.2px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.4);
 }
 
-.form-header { margin-bottom: 2rem; }
-.form-header h2 { font-size: 2rem; margin-bottom: 0.5rem; }
+.form-header { margin-bottom: 2.5rem; text-align: center; }
+.form-header h2 { font-size: 2.2rem; margin-bottom: 0.5rem; color: #f4f4f9; }
 .form-header p { color: var(--text-dim); }
 
-.input-group {
-  margin-bottom: 1.5rem;
-}
-
+.input-group { margin-bottom: 1.5rem; text-align: left; }
 .input-group label {
-  display: block;
-  font-size: 0.85rem;
-  margin-bottom: 8px;
-  color: var(--text-dim);
+  display: block; font-size: 0.85rem; margin-bottom: 8px; color: #e0fbff; font-weight: 500;
 }
-
 .input-group input {
-  width: 100%;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  color: white;
+  width: 100%; padding: 14px 16px; 
+  background: rgba(255, 255, 255, 0.08); 
+  border: 1px solid var(--glass-border); border-radius: 12px; color: white; outline: none; transition: all 0.3s ease;
+}
+.input-group input:focus {
+  border-color: var(--primary); background: rgba(255, 255, 255, 0.15); box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
 }
 
-.actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  font-size: 0.85rem;
-}
-
-.actions a {
-  color: var(--primary);
-  text-decoration: none;
-}
+.actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; font-size: 0.85rem; }
+.actions a { color: var(--primary); text-decoration: none; transition: 0.3s; }
+.actions a:hover { text-shadow: 0 0 8px rgba(0, 210, 255, 0.6); }
 
 .btn-submit {
-  width: 100%;
-  padding: 14px;
-  border-radius: 12px;
-  border: none;
-  background: linear-gradient(to right, var(--primary), var(--secondary));
-  color: white;
-  cursor: pointer;
+  width: 100%; padding: 14px; border-radius: 12px; border: none; background: linear-gradient(to right, var(--primary), var(--secondary)); color: #0f0c29; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s ease;
+}
+.btn-submit:hover {
+  transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0, 210, 255, 0.3);
 }
 </style>
 </head>
 
 <body>
 
+<!-- Same Background Theme as Landing Page -->
+<div class="bg"></div>
+
+<!-- Single Global Star Field -->
+<div class="star-field">
+  <div class="layer"></div>
+  <div class="layer"></div>
+  <div class="layer"></div>
+</div>
+
 <div class="form-side">
+  <div class="form-header">
+    <h2>Login</h2>
+    <p>Enter your details to access your orbit.</p>
+  </div>
 
-<div class="form-header">
-  <h2>Login</h2>
-  <p>Enter your details to access your orbit.</p>
+  <form id="loginForm">
+    <div class="input-group">
+      <label>Email Address</label>
+      <input type="email" id="email" placeholder="name@university.edu" required>
+    </div>
+
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" required>
+    </div>
+
+    <div class="actions">
+      <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; color: var(--text-dim);">
+        <input type="checkbox" style="width: auto; accent-color: var(--primary);"> Remember me
+      </label>
+      <a href="#">Forgot Password?</a>
+    </div>
+
+    <button type="submit" class="btn-submit">Launch Dashboard</button>
+  </form>
+
+  <p style="margin-top: 2rem; font-size: 0.85rem; text-align: center; color: var(--text-dim);">
+    New to the orbit? 
+    <a href="signup.html" style="color: var(--primary); text-decoration: none; font-weight: 600;">
+      Create account
+    </a>
+  </p>
 </div>
 
-<!-- FORM ID ADDED -->
-<form id="loginForm">
-
-  <div class="input-group">
-    <label>Email Address</label>
-    <!-- ID ADDED -->
-    <input type="email" id="email" placeholder="name@university.edu" required>
-  </div>
-
-  <div class="input-group">
-    <label>Password</label>
-    <!-- ID ADDED -->
-    <input type="password" id="password" placeholder="••••••••" required>
-  </div>
-
-  <div class="actions">
-    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
-      <input type="checkbox" style="width: auto;"> Remember me
-    </label>
-    <a href="#">Forgot Password?</a>
-  </div>
-
-  <button type="submit" class="btn-submit">Launch Dashboard</button>
-
-</form>
-
-<p style="margin-top: 2rem; font-size: 0.85rem; text-align: center; color: var(--text-dim);">
-  New to the orbit? 
-  <a href="signup.html" style="color: var(--secondary); text-decoration: none; font-weight: 600;">
-    Create account
-  </a>
-</p>
-
-</div>
 <script>
+document.getElementById("loginForm").addEventListener("submit", async function(e){
+  e.preventDefault();
 
-document
-.getElementById("loginForm")
-.addEventListener(
-"submit",
-async function(e){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
 
-e.preventDefault();
+  try {
+    const response = await fetch("http://localhost:5000/api/v1/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, password })
+    });
 
-const email =
-document
-.getElementById("email")
-.value
-.trim();
+    const data = await response.json();
+    console.log(data);
 
-const password =
-document
-.getElementById("password")
-.value
-.trim();
-
-try{
-
-const response =
-await fetch(
-"https://growthorbit-backend.onrender.com/api/v1/auth/login",
-{
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-email,
-password
-})
-}
-);
-
-const data =
-await response.json();
-
-console.log(data);
-
-if(response.ok){
-
-alert("Login successful");
-
-localStorage.setItem(
-"token",
-data.data.accessToken
-);
-
-localStorage.setItem(
-"isLoggedIn",
-"true"
-);
-
-window.location.href =
-"dashboard.html";
-
-}else{
-
-alert(
-data.message ||
-"Invalid email or password"
-);
-
-}
-
-}catch(err){
-
-console.log(err);
-
-alert(
-"Cannot connect to server"
-);
-
-}
-
+    if(response.ok){
+      alert("Login successful");
+      localStorage.setItem("token", data.data.accessToken);
+      localStorage.setItem("isLoggedIn", "true");
+      window.location.href = "dashboard.html";
+    } else {
+      alert(data.message || "Invalid email or password");
+    }
+  } catch(err) {
+    console.log(err);
+    alert("Cannot connect to server");
+  }
 });
-
 </script>
 
 </body>
